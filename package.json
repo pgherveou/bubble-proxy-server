@@ -1,18 +1,17 @@
 {
   "dependencies": {
-    "micro": "^9.0.2",
-    "openssl-self-signed-certificate": "^1.1.6",
-    "socket.io": "^2.0.4"
+    "micro": "9.0.2",
+    "socket.io": "2.0.4"
   },
   "devDependencies": {
-    "@types/micro": "^7.3.1",
-    "@types/socket.io": "^1.4.31",
-    "tslint-config-prettier": "^1.6.0",
-    "typescript": "^2.6.2"
+    "@types/micro": "7.3.1",
+    "@types/socket.io": "1.4.31",
+    "tslint-config-prettier": "1.6.0",
+    "typescript": "2.6.2"
   },
   "scripts": {
     "start": "node dist/bin/index.js",
-    "prepublish": "npm run lint && npm run build",
+    "prepare": "npm run lint && npm run build",
     "build": "tsc --declaration --project tsconfig.json",
     "lint": "tslint --project tsconfig.json \"src/**/*.ts\""
   },
