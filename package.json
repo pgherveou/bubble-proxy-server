@@ -16,9 +16,9 @@
     "lint": "tslint --project tsconfig.json \"src/**/*.ts\""
   },
   "name": "socket-proxy-server",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
-  "version": "1.0.0",
+  "main": "dist/lib/index.js",
+  "typings": "dist/lib/index.d.ts",
+  "version": "1.0.1",
   "author": "PG Herveou <pgherveou@gmail.com>",
   "license": "MIT"
 }
