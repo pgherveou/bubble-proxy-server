@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es5",
-    "lib": ["es2017", "dom.iterable"],
+    "target": "es2017",
+    "lib": [
+      "es2017",
+      "dom.iterable"
+    ],
     "moduleResolution": "node",
     "rootDir": "src",
     "outDir": "dist",
@@ -12,8 +15,11 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }

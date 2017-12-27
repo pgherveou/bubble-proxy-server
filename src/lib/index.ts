@@ -30,20 +30,17 @@ export class Proxy {
           throw createError(404, 'invalid HTTP/HTTPS request')
         }
 
-        // const namespace = `/${req.headers.host || ''}`
-        const namespace = `/`
-        const sockets = Object.values(this.io.of(namespace).sockets)
+        const sockets = Object.values(this.io.of('/').sockets)
 
         if (sockets.length === 0) {
           throw createError(503, 'No client connected')
         }
 
         if (sockets.length > 1) {
-          throw createError(503, 'Two many client connected')
+          throw createError(503, 'Too many client connected')
         }
 
         const socket = sockets[0]
-
         const request: ISerializedProxyRequest = { method, url, headers }
         const data = await buffer(req, { encoding: '' })
 
@@ -52,7 +49,18 @@ export class Proxy {
         }
 
         const proxyResponse = await new Promise<ISerializedProxyResponse>(
-          resolve => socket.emit('request', request, resolve)
+          (resolve, reject) => {
+            const onDisconnect = () =>
+              reject(createError(503, 'Client disconnected'))
+
+            const acknowledge = (response: ISerializedProxyResponse) => {
+              socket.removeListener('disconnect', onDisconnect)
+              resolve(response)
+            }
+
+            socket.once('disconnect', onDisconnect)
+            socket.emit('request', request, acknowledge)
+          }
         )
 
         Object.entries(proxyResponse.headers).forEach(([name, value]) => {
