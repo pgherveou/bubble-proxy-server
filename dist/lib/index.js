@@ -35,7 +35,7 @@ class Proxy {
                     resp.setHeader(name, value);
                 }
             });
-            micro_1.send(resp, proxyResponse.statusCode, proxyResponse.rawData);
+            micro_1.send(resp, proxyResponse.status, proxyResponse.rawData);
         });
     }
     setSocketIO(io) {

@@ -4,7 +4,7 @@ import { IncomingHttpHeaders, OutgoingHttpHeaders } from 'http';
 import { RequestHandler } from 'micro';
 export interface ISerializedProxyResponse {
     headers: OutgoingHttpHeaders;
-    statusCode: number;
+    status: number;
     rawData?: Buffer;
 }
 export interface ISerializedProxyRequest {

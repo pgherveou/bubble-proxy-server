@@ -3,7 +3,7 @@ import { buffer, createError, RequestHandler, run, send } from 'micro'
 
 export interface ISerializedProxyResponse {
   headers: OutgoingHttpHeaders
-  statusCode: number
+  status: number
   rawData?: Buffer
 }
 
@@ -69,7 +69,7 @@ export class Proxy {
           }
         })
 
-        send(resp, proxyResponse.statusCode, proxyResponse.rawData)
+        send(resp, proxyResponse.status, proxyResponse.rawData)
       })
   }
 

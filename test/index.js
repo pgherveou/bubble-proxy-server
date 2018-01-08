@@ -1,9 +1,13 @@
 import http from 'http'
+import https from 'https'
 import io from 'socket.io-client'
+import certificates from 'openssl-self-signed-certificate'
 import socketIO from 'socket.io'
 import superagent from 'superagent'
 import test from 'ava'
 import { Proxy } from '../dist/lib'
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 async function makeServer() {
   return new Promise(resolve => {
@@ -15,6 +19,21 @@ async function makeServer() {
         server,
         proxy,
         url: `http://localhost:${server.address().port}`
+      })
+    )
+  })
+}
+
+async function makeSecureServer() {
+  return new Promise(resolve => {
+    const proxy = new Proxy()
+    const server = https.createServer(certificates, proxy.makeRequestListener())
+    proxy.setSocketIO(socketIO(server, { transports: ['websocket'] }))
+    server.listen(0, () =>
+      resolve({
+        server,
+        proxy,
+        url: `https://localhost:${server.address().port}`
       })
     )
   })
@@ -84,12 +103,15 @@ test('Socket disconnect', async t => {
 })
 
 test('Get response from socket', async t => {
-  const { url, server } = await makeServer()
-  const socket = io(url, { transports: ['websocket'] })
+  const { url, server } = await makeSecureServer()
+  const socket = io(url, {
+    transports: ['websocket'],
+    rejectUnauthorized: false
+  })
 
   const response = {
     headers: { 'x-test': 'test', 'content-type': 'text' },
-    statusCode: 200,
+    status: 200,
     rawData: Buffer.from('hello')
   }
 
@@ -100,7 +122,7 @@ test('Get response from socket', async t => {
   try {
     await new Promise(resolve => socket.once('connect', () => resolve()))
     const actualResponse = await superagent.get(url)
-    t.true(actualResponse.status == response.statusCode)
+    t.true(actualResponse.status == response.status)
     t.true(actualResponse.headers['x-test'] == response.headers['x-test'])
     t.true(actualResponse.text == response.rawData.toString())
   } finally {

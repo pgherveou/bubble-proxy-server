@@ -2,11 +2,12 @@
   "name": "socket-proxy-server",
   "main": "dist/lib/index.js",
   "typings": "dist/lib/index.d.ts",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "PG Herveou <pgherveou@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "micro": "9.0.2",
+    "openssl-self-signed-certificate": "1.1.6",
     "socket.io": "2.0.4"
   },
   "devDependencies": {
