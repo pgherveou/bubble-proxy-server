@@ -1,6 +1,6 @@
 import http from 'http'
 import https from 'https'
-import io from 'socket.io-client'
+import ioClient from 'socket.io-client'
 import certificates from 'openssl-self-signed-certificate'
 import socketIO from 'socket.io'
 import superagent from 'superagent'
@@ -58,7 +58,7 @@ test('Too many client connected', async t => {
   const sockets = Array(2)
     .fill('')
     .map(() =>
-      io(url, {
+      ioClient(url, {
         multiplex: false,
         transports: ['websocket']
       })
@@ -83,14 +83,14 @@ test('Too many client connected', async t => {
 
 test('Socket disconnect', async t => {
   const { url, server } = await makeServer()
-  const socket = io(url, { transports: ['websocket'] })
+  const io = ioClient(url, { transports: ['websocket'] })
 
-  socket.once('request', async (request, ack) => {
-    socket.disconnect()
+  io.once('request', async (request, ack) => {
+    io.disconnect()
   })
 
   try {
-    await new Promise(resolve => socket.once('connect', () => resolve()))
+    await new Promise(resolve => io.once('connect', () => resolve()))
     const response = await superagent.get(url)
   } catch (err) {
     t.true(err.response.status === 503)
@@ -104,7 +104,7 @@ test('Socket disconnect', async t => {
 
 test('Get response from socket', async t => {
   const { url, server } = await makeSecureServer()
-  const socket = io(url, {
+  const io = ioClient(url, {
     transports: ['websocket'],
     rejectUnauthorized: false
   })
@@ -115,12 +115,12 @@ test('Get response from socket', async t => {
     rawData: Buffer.from('hello')
   }
 
-  socket.once('request', async (request, ack) => {
+  io.once('request', async (request, ack) => {
     ack(response)
   })
 
   try {
-    await new Promise(resolve => socket.once('connect', () => resolve()))
+    await new Promise(resolve => io.once('connect', () => resolve()))
     const actualResponse = await superagent.get(url)
     t.true(actualResponse.status == response.status)
     t.true(actualResponse.headers['x-test'] == response.headers['x-test'])

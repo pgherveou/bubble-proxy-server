@@ -2,7 +2,7 @@
   "name": "socket-proxy-server",
   "main": "dist/lib/index.js",
   "typings": "dist/lib/index.d.ts",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "author": "PG Herveou <pgherveou@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -12,15 +12,17 @@
   },
   "devDependencies": {
     "@types/micro": "7.3.1",
-    "@types/socket.io-client": "1.4.32",
     "@types/socket.io": "1.4.31",
+    "@types/socket.io-client": "1.4.32",
     "ava": "0.24.0",
     "socket.io-client": "2.0.4",
     "superagent": "3.8.2",
+    "tslint": "5.8.0",
     "tslint-config-prettier": "1.6.0",
     "typescript": "2.6.2"
   },
   "scripts": {
+    "pretest": "npm run build",
     "test": "ava",
     "start": "node dist/bin/index.js",
     "prepare": "npm run lint && npm run build",

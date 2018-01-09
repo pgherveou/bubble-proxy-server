@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const micro_1 = require("micro");
+function getRoom(hostname = '') {
+    return `/${hostname || ''}`;
+}
 class Proxy {
     makeRequestListener() {
         return (req, res) => micro_1.run(req, res, async (req, resp) => {
@@ -8,7 +11,9 @@ class Proxy {
             if (!method || !url) {
                 throw micro_1.createError(404, 'invalid HTTP/HTTPS request');
             }
-            const sockets = Object.values(this.io.of('/').sockets);
+            const room = getRoom(headers.host);
+            const sockets = Object.values(this.io.in(room).sockets);
+            console.log(`sending request to socket in ${room}`);
             if (sockets.length === 0) {
                 throw micro_1.createError(503, 'No client connected');
             }
@@ -40,6 +45,11 @@ class Proxy {
     }
     setSocketIO(io) {
         this.io = io;
+        this.io.on('connection', socket => {
+            const room = getRoom(socket.handshake.headers.host);
+            console.log(`socket joining ${room}`);
+            socket.join(room);
+        });
     }
 }
 exports.Proxy = Proxy;
