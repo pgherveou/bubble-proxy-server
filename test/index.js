@@ -74,7 +74,7 @@ test('Too many client connected', async t => {
     t.true(err.response.status === 503)
     t.true(
       err.response.text.split('\n').shift() ===
-        'Error: Too many client connected'
+        'Error: Too many client connected (2)'
     )
   } finally {
     server.close()

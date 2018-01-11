@@ -2,7 +2,7 @@
   "name": "bubble-proxy-server",
   "main": "dist/lib/index.js",
   "typings": "dist/lib/index.d.ts",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": "PG Herveou <pgherveou@gmail.com>",
   "license": "MIT",
   "dependencies": {

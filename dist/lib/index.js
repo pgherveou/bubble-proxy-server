@@ -11,16 +11,20 @@ class Proxy {
             if (!method || !url) {
                 throw micro_1.createError(404, 'invalid HTTP/HTTPS request');
             }
-            const room = getRoom(headers.host);
-            const sockets = Object.values(this.io.in(room).sockets);
-            console.log(`sending request to socket in ${room}`);
-            if (sockets.length === 0) {
+            const roomName = getRoom(headers.host);
+            const room = this.io.sockets.adapter.rooms[roomName];
+            console.log(`sending request to socket in ${roomName}`);
+            if (!room || room.length === 0) {
                 throw micro_1.createError(503, 'No client connected');
             }
-            if (sockets.length > 1) {
-                throw micro_1.createError(503, 'Too many client connected');
+            if (room.length > 1) {
+                throw micro_1.createError(503, `Too many client connected (${room.length})`);
             }
-            const socket = sockets[0];
+            const socketId = Object.keys(room.sockets)[0];
+            const socket = this.io.sockets.connected[socketId];
+            if (!socket) {
+                throw micro_1.createError(503, `No connected socket`);
+            }
             const request = { method, url, headers };
             const data = await micro_1.buffer(req, { encoding: '' });
             if (data.length > 0) {
