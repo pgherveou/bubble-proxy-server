@@ -6,4 +6,6 @@ const index_1 = require("../lib/index");
 const proxy = new index_1.Proxy();
 const server = http.createServer(proxy.makeRequestListener());
 proxy.setSocketIO(socketIO(server, { serveClient: false }));
-server.listen(3001);
+server.listen(3001, () => {
+    console.log(`Bubble Proxy started, env: ${process.env.NODE_ENV}`);
+});
