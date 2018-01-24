@@ -41,13 +41,14 @@ async function makeSecureServer() {
 
 test('No client connected', async t => {
   const { url, server } = await makeServer()
+
+  t.plan(2)
+
   try {
     await superagent.get(url)
   } catch (err) {
     t.true(err.response.status === 503)
-    t.true(
-      err.response.text.split('\n').shift() === 'Error: No client connected'
-    )
+    t.true(err.response.text === 'No client connected')
   } finally {
     server.close()
   }
@@ -68,14 +69,13 @@ test('Too many client connected', async t => {
     sockets.map(s => new Promise(resolve => s.once('connect', () => resolve())))
   )
 
+  t.plan(2)
+
   try {
     await superagent.get(url)
   } catch (err) {
     t.true(err.response.status === 503)
-    t.true(
-      err.response.text.split('\n').shift() ===
-        'Error: Too many client connected (2)'
-    )
+    t.true(err.response.text === 'Too many client connected (2)')
   } finally {
     server.close()
   }
@@ -84,6 +84,8 @@ test('Too many client connected', async t => {
 test('Socket disconnect', async t => {
   const { url, server } = await makeServer()
   const io = ioClient(url, { transports: ['websocket'] })
+
+  t.plan(2)
 
   io.once('request', async (request, ack) => {
     io.disconnect()
@@ -94,9 +96,7 @@ test('Socket disconnect', async t => {
     const response = await superagent.get(url)
   } catch (err) {
     t.true(err.response.status === 503)
-    t.true(
-      err.response.text.split('\n').shift() === 'Error: Client disconnected'
-    )
+    t.true(err.response.text === 'Client disconnected')
   } finally {
     server.close()
   }
@@ -114,6 +114,8 @@ test('Get response from socket', async t => {
     status: 200,
     rawData: Buffer.from('hello')
   }
+
+  t.plan(3)
 
   io.once('request', async (request, ack) => {
     ack(response)

@@ -1,10 +1,10 @@
 import { IncomingHttpHeaders, OutgoingHttpHeaders } from 'http'
-import { buffer, createError, RequestHandler, run, send } from 'micro'
+import { buffer, RequestHandler, run, send } from 'micro'
 
 export interface ISerializedProxyResponse {
   headers: OutgoingHttpHeaders
   status: number
-  rawData?: Buffer
+  rawData?: Buffer | string
 }
 
 export interface ISerializedProxyRequest {
@@ -20,7 +20,7 @@ export type ProxyRequestHandler = (
 ) => void
 
 function getRoom(hostname: string = '') {
-  return `/${hostname || ''}`
+  return `/${hostname}`
 }
 
 export class Proxy {
@@ -31,26 +31,25 @@ export class Proxy {
         const { method, url, headers } = req
 
         if (!method || !url) {
-          throw createError(404, 'invalid HTTP/HTTPS request')
+          return send(resp, 404, 'invalid HTTP/HTTPS request')
         }
 
         const roomName = getRoom(headers.host)
         const room = this.io.sockets.adapter.rooms[roomName]
-        console.log(`sending request to socket in ${roomName}`)
 
         if (!room || room.length === 0) {
-          throw createError(503, 'No client connected')
+          return send(resp, 503, 'No client connected')
         }
 
         if (room.length > 1) {
-          throw createError(503, `Too many client connected (${room.length})`)
+          return send(resp, 503, `Too many client connected (${room.length})`)
         }
 
         const socketId = Object.keys(room.sockets)[0]
         const socket = this.io.sockets.connected[socketId]
 
         if (!socket) {
-          throw createError(503, `No connected socket`)
+          return send(resp, 503, 'No connected socket')
         }
 
         const request: ISerializedProxyRequest = { method, url, headers }
@@ -61,9 +60,13 @@ export class Proxy {
         }
 
         const proxyResponse = await new Promise<ISerializedProxyResponse>(
-          (resolve, reject) => {
+          resolve => {
             const onDisconnect = () =>
-              reject(createError(503, 'Client disconnected'))
+              resolve({
+                status: 503,
+                headers: {},
+                rawData: 'Client disconnected'
+              })
 
             const acknowledge = (response: ISerializedProxyResponse) => {
               socket.removeListener('disconnect', onDisconnect)
@@ -89,7 +92,6 @@ export class Proxy {
     this.io = io
     this.io.on('connection', socket => {
       const room = getRoom(socket.handshake.headers.host)
-      console.log(`socket joining ${room}`)
       socket.join(room)
     })
   }
